@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human finder</title>
+    <script src="https://algorithmia.com/v1/clients/js/algorithmia-0.2.1.js" type="text/javascript"></script>
+</head>
+<body>
+    <div id="container">
+        <h1>1) Use these helpful links to search for humans.</h1>
+        https://upload.wikimedia.org/wikipedia/commons/d/d6/Mountain_Lion_in_Glacier_National_Park.jpg<hr>
+        https://hips.hearstapps.com/digitalspyuk.cdnds.net/16/48/1480508469-harry-potter-in-90-minutes-1480436463.jpg<hr>
+
+        <h1>2) Use the console to see all the helpful incoming info.</h1>
+        <h1>3) Input your image url to look for humans : </h1>
+        <form action="" id="form" onsubmit="sConsole(event)">
+          <input type="text" name="data" id="data">
+          <button type="submit">Submit</button>
+        </form>
+        <div>
+            <h1 id="response"></h1>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function sConsole(event) {
+        event.preventDefault();
+        var data = document.getElementById("data");
+        var imageUserAdded = document.getElementById("responseimage");
+
+        // Possible characteristics to look for
+        const humanCharacteristics = ["male", "female", "beard"]
+
+        if(data.value){
+            document.getElementById("response").innerHTML = "Loading data, this may take from 15 seconds up to a minute...";
+            
+            var input = {
+                "image": data.value
+            };
+            Algorithmia.client("simQ9TZKdqfLyMuyDQyhF8V+ViP1")
+            .algo("deeplearning/IllustrationTagger/0.4.0?timeout=300")
+            .pipe(input)
+            .then(
+                async function(output) { 
+                    let outputInfo = await output;
+                    if(!outputInfo){
+                        console.log(outputInfo);
+                    }else{
+                        var generalInfo = outputInfo.result.general
+                        var ratingInfo = outputInfo.result.rating
+                        var possibleCharacteristics = null
+                        console.table(generalInfo);
+                        console.table(ratingInfo);
+
+                        for(let i=0; i<generalInfo.length; i++){
+                            for(let j=0; j< humanCharacteristics.length; j++){
+
+                                // We filter the incoming data to see if it has any of our characteristics
+
+                                if(generalInfo[i].hasOwnProperty(humanCharacteristics[j])){
+                                    possibleCharacteristics = generalInfo[i]
+                                    console.log("The possible indication: ")
+                                    console.log( generalInfo[i])
+                                    document.getElementById("response").innerHTML = "This is  a human."
+                                }
+                            }
+                        }
+
+                    }
+                    if(possibleCharacteristics == null) {
+                        document.getElementById("response").innerHTML = "This is not a human."
+                    }
+                });
+            
+            }
+        }
+    </script>
+</body>
+</html>
