@@ -23,20 +23,22 @@
         </div>
     </div>
     <script type="text/javascript">
+
+        // When user adds an image url and submits a form the process begins.
         function sConsole(event) {
         event.preventDefault();
         var data = document.getElementById("data");
         var imageUserAdded = document.getElementById("responseimage");
 
-        // Possible characteristics to look for
+        // These are the local variables by which we can interpet the results.
         const humanCharacteristics = ["male", "female", "beard"]
-
         if(data.value){
             document.getElementById("response").innerHTML = "Loading data, this may take from 15 seconds up to a minute...";
-            
             var input = {
                 "image": data.value
             };
+
+            // We send a query to algorithmia.
             Algorithmia.client("simQ9TZKdqfLyMuyDQyhF8V+ViP1")
             .algo("deeplearning/IllustrationTagger/0.4.0?timeout=300")
             .pipe(input)
@@ -46,17 +48,17 @@
                     if(!outputInfo){
                         console.log(outputInfo);
                     }else{
+
+                        // We console log the results.
                         var generalInfo = outputInfo.result.general
                         var ratingInfo = outputInfo.result.rating
                         var possibleCharacteristics = null
                         console.table(generalInfo);
                         console.table(ratingInfo);
-
                         for(let i=0; i<generalInfo.length; i++){
                             for(let j=0; j< humanCharacteristics.length; j++){
 
                                 // We filter the incoming data to see if it has any of our characteristics
-
                                 if(generalInfo[i].hasOwnProperty(humanCharacteristics[j])){
                                     possibleCharacteristics = generalInfo[i]
                                     console.log("The possible indication: ")
@@ -65,7 +67,6 @@
                                 }
                             }
                         }
-
                     }
                     if(possibleCharacteristics == null) {
                         document.getElementById("response").innerHTML = "This is not a human."
